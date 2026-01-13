@@ -4,6 +4,7 @@ import RAPIER from '@dimforge/rapier3d-simd-compat';
 import * as xb from 'xrblocks';
 
 import {SplashScript} from './SplashScript.js';
+import {VonageAudioCall} from './VonageAudioCall.js';
 
 const depthMeshColliderUpdateFps = xb.getUrlParamFloat(
   'depthMeshColliderUpdateFps',
@@ -21,10 +22,12 @@ options.xrButton = {
 };
 options.physics.RAPIER = RAPIER;
 options.physics.useEventQueue = true;
+options.enableUI();
 
 // Initializes the scene, camera, xrRenderer, controls, and XR button.
 async function start() {
   xb.add(splashScript);
+  xb.add(new VonageAudioCall());
   await xb.init(options);
 }
 
