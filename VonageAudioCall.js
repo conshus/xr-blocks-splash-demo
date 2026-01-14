@@ -100,7 +100,9 @@ export class VonageAudioCall extends xb.Script {
             console.log("Destroying Call UI...");
             // Assuming 'destroy()' is the method to remove an XR element. 
             // If strictly using three.js/xb logic, it might be: this.remove(this.panel);
-            this.panel.destroy(); 
+            // this.panel.destroy(); 
+            // this.panel.remove(); 
+            this.remove(this.panel);
             this.panel = null;
             this.statusText = null;
         }
