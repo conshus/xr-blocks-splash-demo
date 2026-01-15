@@ -5,6 +5,7 @@ import * as xb from 'xrblocks';
 
 import {SplashScript} from './SplashScript.js';
 import {VonageAudioCall} from './VonageAudioCall.js';
+import { ExitPanel } from './ExitButton.js';
 
 const depthMeshColliderUpdateFps = xb.getUrlParamFloat(
   'depthMeshColliderUpdateFps',
@@ -28,6 +29,7 @@ options.enableUI();
 async function start() {
   xb.add(splashScript);
   xb.add(new VonageAudioCall());
+  xb.add(new ExitPanel());
   await xb.init(options);
 }
 
