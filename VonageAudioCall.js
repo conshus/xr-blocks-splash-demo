@@ -11,7 +11,11 @@ export class VonageAudioCall extends xb.Script {
         this.panel = null; 
         this.statusText = null;
         this.userName = "XR_User_1";
-        this.serverURL = "https://orange-memory-pgwjpp4q426xvj-3000.app.github.dev"
+        this.serverURL = "https://orange-memory-pgwjpp4q426xvj-3000.app.github.dev";
+        this.grid = null;
+        this.controlRow = null;
+        // this.preCallCtrlRow = null;
+        // this.onCallCtrlRow = null;
     }
 
     init() {
@@ -41,15 +45,10 @@ export class VonageAudioCall extends xb.Script {
             
             console.log("Session created successfully. Session ID:", sessionId);
 
-            // 3. Update UI (Replace DOM code with XR Logic)
-            // document.getElementById("login").style.display = "none"; <--- WON'T WORK IN XR
-            
+            // 3. Update UI
             // Instead, update your XR Panel text to show we are ready
             if(this.statusText) {
                 this.statusText.text = "Connected. Waiting for calls...";
-            // } else {
-                // If no panel exists yet, maybe create a "Ready" panel
-                // this.createStatusPanel("Connected as " + name); 
             }
 
         } catch (error) {
@@ -69,42 +68,150 @@ export class VonageAudioCall extends xb.Script {
         this.panel = new xb.SpatialPanel({ backgroundColor: '#2b2b2baa' });
         this.add(this.panel);
 
-        const grid = this.panel.addGrid();
+        this.grid = this.panel.addGrid();
 
         // 2. Status Text
-        this.statusText = grid.addRow({ weight: 0.7 }).addText({
+        this.statusText = this.grid.addRow({ weight: 0.7 }).addText({
             text: `Incoming call from ${callerName}...`,
             fontColor: '#ffffff',
             fontSize: 0.08,
         });
 
-        // 3. Controls
-        const ctrlRow = grid.addRow({ weight: 0.3 });
+        this.updateControlRow('INCOMING');
 
-        // Answer
-        const yesButton = ctrlRow.addCol({ weight: 0.5 }).addIconButton({ text: 'call', fontSize: 0.5, color: '#00ff00' });
-        yesButton.onTriggered = () => this._onAnswer();
+        // // 3. Controls
+        // // pre-call
+        // this.preCallCtrlRow = grid.addRow({ weight: 0.3 });
 
-        // Reject
-        const noButton = ctrlRow.addCol({ weight: 0.5 }).addIconButton({ text: 'call_end', fontSize: 0.5, color: '#ff0000' });
-        noButton.onTriggered = () => this._onHangup();
+        // // Answer
+        // const answerButton = this.preCallCtrlRow.addCol({ weight: 0.5 }).addIconButton({
+        //     text: 'call',
+        //     fontSize: 0.5,
+        //     backgroundColor: '#00ff00'
+        // });
+        // answerButton.onTriggered = () => this._onAnswer();
 
-        // Orbiter
-        const orbiter = grid.addOrbiter();
-        orbiter.addExitButton();
+        // // Reject
+        // const rejectButton = this.preCallCtrlRow.addCol({ weight: 0.5 }).addIconButton({
+        //     text: 'call_end',
+        //     fontSize: 0.5,
+        //     backgroundColor: '#ff0000'
+        // });
+        // rejectButton.onTriggered = () => this._onReject();
+
+        // // this.panel.hide(preCallCtrlRow);
+        // // this.remove(preCallCtrlRow);
+
+        // //on-call
+        // this.onCallCtrlRow = grid.addRow({ weight: 0 });
+        // this.onCallCtrlRow.visible = false;
+
+        // // Hangup
+        // const hangupButton = this.onCallCtrlRow.addCol({ weight: 1 }).addIconButton({
+        //     text: 'call_end',
+        //     fontSize: 0.5,
+        //     backgroundColor: '#ff0000'
+        // });
+        // hangupButton.onTriggered = () => this._onHangup();
+        
+
+        // // // Orbiter
+        // // const orbiter = grid.addOrbiter();
+        // // orbiter.addExitButton();
+        // this.panel.updateLayouts();
+    }
+
+    // setCallState(state) {
+    //     if (!this.panel) return;
+
+    //     if (state === 'IN_CALL') {
+    //         // Hide Pre-Call
+    //         this.preCallCtrlRow.visible = false;
+    //         this.preCallCtrlRow.weight = 0;
+
+    //         // Show On-Call
+    //         this.onCallCtrlRow.visible = true;
+    //         this.onCallCtrlRow.weight = 0.3;
+
+    //         console.log("this.onCallCtlRow: ",this.onCallCtrlRow)
+            
+    //     } else if (state === 'INCOMING') {
+    //         // Show Pre-Call
+    //         this.preCallCtrlRow.visible = true;
+    //         this.preCallCtrlRow.weight = 0.3;
+
+    //         // Hide On-Call
+    //         this.onCallCtrlRow.visible = false;
+    //         this.onCallCtrlRow.weight = 0;
+    //     }
+
+    //     // IMPORTANT: Tell the panel to recalculate sizes
+    //     this.panel.updateLayouts();
+    // }
+
+    updateControlRow(state) {
+        if (!this.grid) return;
+
+        // 1. Remove the existing row if it exists
+        if (this.controlRow) {
+            // Depending on xb version, you might need this.controlRow.destroy() 
+            // or removing it from grid children. 
+            // Usually destroying the object is enough:
+            // this.controlRow.destroy(); 
+            // this.controlRow.remove();
+            // console.log("this.controlRow: ", this.controlRow);
+            this.grid.remove(this.controlRow);
+            // if (this.controlRow.parent) this.controlRow.parent.remove(this.controlRow);
+            this.controlRow = null;
+            this.grid.resetLayout();
+        }
+
+        // 2. Create a fresh row. It will naturally append below the Status Text.
+        // We give it the full remaining weight (0.3 relative to the panel, or flexible)
+        this.controlRow = this.grid.addRow({ weight: 0.3 });
+
+        if (state === 'INCOMING') {
+            // --- ANSWER BUTTON ---
+            const answerBtn = this.controlRow.addCol({ weight: 0.5 }).addIconButton({
+                text: 'call',
+                fontSize: 0.5,
+                backgroundColor: '#00ff00'
+            });
+            answerBtn.onTriggered = () => this._onAnswer();
+
+            // --- REJECT BUTTON ---
+            const rejectBtn = this.controlRow.addCol({ weight: 0.5 }).addIconButton({
+                text: 'call_end',
+                fontSize: 0.5,
+                backgroundColor: '#ff0000'
+            });
+            rejectBtn.onTriggered = () => this._onReject();
+
+        } else if (state === 'CONNECTED') {
+            // --- HANGUP BUTTON ---
+            // This is a fresh row, so layouts will calculate correctly
+            const hangupBtn = this.controlRow.addCol({ weight: 1 }).addIconButton({
+                text: 'call_end',
+                fontSize: 0.5,
+                backgroundColor: '#ff0000'
+            });
+            hangupBtn.onTriggered = () => this._onHangup();
+        }
+
+        // 3. Force layout update
         this.panel.updateLayouts();
     }
 
-    destroyCallPanel() {
+    removeCallPanel() {
         if (this.panel) {
             console.log("Destroying Call UI...");
-            // Assuming 'destroy()' is the method to remove an XR element. 
-            // If strictly using three.js/xb logic, it might be: this.remove(this.panel);
-            // this.panel.destroy(); 
-            // this.panel.remove(); 
             this.remove(this.panel);
             this.panel = null;
+            this.grid = null;
             this.statusText = null;
+            this.controlRow = null;
+            // this.preCallCtrlRow = null;
+            // this.onCallCtrlRow = null;
         }
     }
 
@@ -119,22 +226,23 @@ export class VonageAudioCall extends xb.Script {
         });
 
         this.client.on('legStatusUpdate', (callId, legId, status) => {
+            console.log("status: ", status);
             if (this.statusText) {
                 this.statusText.text = `Status: ${status}`;
             }
         });
 
-        // --- 2. DESTROY UI ON CANCEL/HANGUP ---
+        // --- 2. REMOVE UI ON CANCEL/HANGUP ---
         this.client.on('callInviteCancel', (callId) => {
             console.log(`Call cancelled: ${callId}`);
             this.callId = null;
-            this.destroyCallPanel();
+            this.removeCallPanel();
         });
 
         this.client.on("callHangup", (callId, callQuality, reason) => {
             console.log(`Call hung up: ${reason}`);
             this.callId = null;
-            this.destroyCallPanel();
+            this.removeCallPanel();
         });
     }
 
@@ -144,10 +252,26 @@ export class VonageAudioCall extends xb.Script {
         .then(() => {
           console.log("Success answering call.");
           this.statusText.text = `Call answered.`;
+        //   this.setCallState('IN_CALL');
+        this.updateControlRow('CONNECTED');
         })
         .catch(error => {
           console.error("Error answering call: ", error);
         });    
+    }
+
+    _onReject() {
+        console.log('Rejecting...');
+        // this.client.hangup(this.callId);
+        this.client.reject(this.callId)
+        .then(() => {
+          console.log("Success rejecting call.");
+        })
+        .catch(error => {
+          console.error("Error rejecting call: ", error);
+        });           
+        // We manually destroy the panel here too, just in case the event lags
+        this.removeCallPanel(); 
     }
 
     _onHangup() {
@@ -161,7 +285,7 @@ export class VonageAudioCall extends xb.Script {
           console.error("Error hanging up call: ", error);
         });           
         // We manually destroy the panel here too, just in case the event lags
-        this.destroyCallPanel(); 
+        this.removeCallPanel(); 
     }
 
 }
