@@ -11,7 +11,7 @@ export class VonageAudioCall extends xb.Script {
         this.panel = null; 
         this.statusText = null;
         this.userName = "XR_User_1";
-        this.serverURL = "https://orange-memory-pgwjpp4q426xvj-3000.app.github.dev";
+        this.serverURL = null; // Set this to your server URL when initializing the script
         this.grid = null;
         this.controlRow = null;
         // this.preCallCtrlRow = null;
