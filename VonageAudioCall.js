@@ -66,6 +66,12 @@ export class VonageAudioCall extends xb.Script {
         
         // 1. Create the Panel
         this.panel = new xb.SpatialPanel({ backgroundColor: '#2b2b2baa' });
+        this.panel.position.set(
+            0,
+            xb.user.height - 0.5,
+            -xb.user.objectDistance
+        );
+
         this.add(this.panel);
 
         this.grid = this.panel.addGrid();

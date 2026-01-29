@@ -20,6 +20,12 @@ options.xrButton = {
   ...options.xrButton,
   startText: '<i id="xrlogo"></i> MAKE A MESS',
   endText: '<i id="xrlogo"></i> MISSION COMPLETE',
+  showEnterSimulatorButton: true,
+  permissions: {
+      geolocation: false,
+      camera: false,
+      microphone: true,
+    }
 };
 options.physics.RAPIER = RAPIER;
 options.physics.useEventQueue = true;
